@@ -19,13 +19,16 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
+    const cleanOrigin = origin.replace(/\/$/, "");
     const isAllowed = allowedOrigins.some((allowed) => {
-      return origin === allowed || origin.startsWith(allowed);
-    });
+      const cleanAllowed = allowed.replace(/\/$/, "");
+      return cleanOrigin === cleanAllowed || cleanOrigin.startsWith(cleanAllowed);
+    }) || cleanOrigin.endsWith(".vercel.app") || cleanOrigin.startsWith("http://localhost:") || cleanOrigin.startsWith("http://127.0.0.1:");
+    
     if (isAllowed) {
       callback(null, true);
     } else {
-      callback(null, false); // Fail silently or reject
+      callback(null, false);
     }
   },
   credentials: true,

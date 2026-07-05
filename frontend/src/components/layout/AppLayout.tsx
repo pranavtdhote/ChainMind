@@ -37,7 +37,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       if (res.ok) {
         const data = await res.json();
         setHealthData(data);
-        if (data.status === "online") {
+        if (data.status === "online" || data.success === true || data.status === "ok") {
           setBackendStatus("online");
         } else {
           setBackendStatus("offline");
