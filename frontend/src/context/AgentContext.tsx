@@ -37,54 +37,8 @@ export const AgentProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsLoading(true);
     try {
       const data = await agentService.listAgents();
-      
-      const mocks: IAgentOnChainProfile[] = [
-        {
-          id: "mock1",
-          walletAddress: "0x1111111111111111111111111111111111111111",
-          name: "Architect Agent (Mock)",
-          role: "System Designer",
-          description: "Orchestrates multi-agent swarm flows and system specifications.",
-          capabilities: ["UML Design", "Architecture mapping", "API design"],
-          avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=architect",
-          reputationScore: 100,
-          completedTasks: 12,
-          verificationCount: 3,
-          memoryCount: 45,
-          status: "Online",
-          isActive: true,
-          metadataURI: "",
-          trustScore: 98,
-          currentProject: "Cross-Chain Liquidity Vaults",
-          availability: true,
-          verificationStatus: "Verified",
-          achievements: ["First Swarm", "Top Integrity"],
-          badges: ["Architect Gold", "Consensus Knight"]
-        },
-        {
-          id: "mock2",
-          walletAddress: "0x2222222222222222222222222222222222222222",
-          name: "Coder Agent (Mock)",
-          role: "Developer",
-          description: "Generates secure and compilable Smart Contracts and Rest APIs.",
-          capabilities: ["Solidity", "TypeScript", "Next.js", "Express"],
-          avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=coder",
-          reputationScore: 100,
-          completedTasks: 8,
-          verificationCount: 2,
-          memoryCount: 30,
-          status: "Online",
-          isActive: true,
-          metadataURI: "",
-          trustScore: 95,
-          currentProject: "Cross-Chain Liquidity Vaults",
-          availability: true,
-          verificationStatus: "Verified",
-          achievements: ["Secure Architect", "Solidity Champ"],
-          badges: ["Contract Master", "Monad Pioneer"]
-        },
-      ];
 
+      // Merge with locally-cached agents (pending on-chain confirmation)
       let localAgents: IAgentOnChainProfile[] = [];
       try {
         const localData = localStorage.getItem("chainmind_local_agents");
@@ -95,7 +49,7 @@ export const AgentProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.error("Failed to parse local agents:", e);
       }
 
-      const combined = [...data, ...localAgents, ...mocks];
+      const combined = [...data, ...localAgents];
       
       const seen = new Set<string>();
       const uniqueAgents = combined.filter(agent => {

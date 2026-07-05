@@ -5,44 +5,49 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import { API_BASE_URL } from "@/config/api";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, CheckCircle } from "lucide-react";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
+interface HealthStatus {
+  status: string;
+  database: string;
+  blockchain: string;
+  version: string;
+}
+
 export default function AppLayout({ children }: AppLayoutProps) {
-  const [isBackendDown, setIsBackendDown] = useState(false);
-  const [checking, setChecking] = useState(false);
+  const [backendStatus, setBackendStatus] = useState<"online" | "offline" | "checking">("checking");
+  const [healthData, setHealthData] = useState<HealthStatus | null>(null);
 
   const checkHealth = async () => {
-    setChecking(true);
+    setBackendStatus("checking");
     try {
-      // Use controller abort to set a timeout of 5 seconds
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const res = await fetch(`${API_BASE_URL}/api/system/health`, {
-        signal: controller.signal
+        signal: controller.signal,
       });
       clearTimeout(timeoutId);
 
       if (res.ok) {
-        setIsBackendDown(false);
+        const data = await res.json();
+        setHealthData(data);
+        setBackendStatus("online");
       } else {
-        setIsBackendDown(true);
+        setBackendStatus("offline");
       }
-    } catch (err) {
-      console.warn("Backend health check failed:", err);
-      setIsBackendDown(true);
-    } finally {
-      setChecking(false);
+    } catch {
+      setBackendStatus("offline");
     }
   };
 
   useEffect(() => {
     checkHealth();
-    const interval = setInterval(checkHealth, 15000); // Check every 15s
+    const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -51,21 +56,33 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Top Header Navigation */}
       <Navbar />
 
-      {/* Backend Down Warning Banner */}
-      {isBackendDown && (
-        <div className="w-full bg-red-950/80 border-b border-red-500/30 px-6 py-2 flex items-center justify-between text-xs text-red-200 backdrop-blur-md">
+      {/* Backend Status Banner */}
+      {backendStatus === "offline" && (
+        <div className="w-full bg-red-950/80 border-b border-red-500/30 px-6 py-2.5 flex items-center justify-between text-xs text-red-200 backdrop-blur-md">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-400" />
-            <span><strong>Backend Offline:</strong> The ChainMind Swarm Orchestrator is currently offline. Swarm executions and database updates are running in mock fallback mode.</span>
+            <AlertTriangle className="h-4 w-4 text-red-400 flex-shrink-0" />
+            <span>
+              <strong>Backend Unavailable:</strong> Cannot reach the ChainMind API server. Please verify the backend is running and try again.
+            </span>
           </div>
           <button
             onClick={checkHealth}
-            disabled={checking}
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-red-900/30 hover:bg-red-900/50 border border-red-500/20 hover:border-red-500/40 rounded transition-all text-[11px] font-bold text-red-300 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1 bg-red-900/40 hover:bg-red-900/60 border border-red-500/20 hover:border-red-500/40 rounded transition-all text-[11px] font-bold text-red-300"
           >
-            <RefreshCw className={`h-3 w-3 ${checking ? "animate-spin" : ""}`} />
-            Retry Connection
+            <RefreshCw className="h-3 w-3" />
+            Retry
           </button>
+        </div>
+      )}
+
+      {healthData && healthData.database === "disconnected" && backendStatus === "online" && (
+        <div className="w-full bg-amber-950/80 border-b border-amber-500/30 px-6 py-2 flex items-center justify-between text-xs text-amber-200 backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-400 flex-shrink-0" />
+            <span>
+              <strong>Database Disconnected:</strong> MongoDB is not reachable. Data persistence is unavailable.
+            </span>
+          </div>
         </div>
       )}
 

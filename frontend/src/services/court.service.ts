@@ -26,81 +26,38 @@ export interface ICourtCaseSummary {
 
 export class CourtService {
   static async getStatistics(): Promise<ICourtStatistics> {
-    try {
-      const res = await fetch(`${API_URL}/court/statistics`);
-      const json = await res.json();
-      if (json.success) return json.data;
-      throw new Error(json.error || "Failed to fetch court stats.");
-    } catch (error) {
-      console.warn("[CourtService]: Using fallback statistics.", error);
-      return {
-        totalCases: 3,
-        averageIntegrity: 82,
-        averageConsensus: 78,
-        averageConfidence: 85,
-        failedVerifications: 1,
-        approvedCount: 2,
-        approvalRate: 67,
-        courtStatus: "Active",
-        verifierStatus: "Online",
-      };
-    }
+    const res = await fetch(`${API_URL}/court/statistics`);
+    if (!res.ok) throw new Error(`Court statistics request failed: ${res.status}`);
+    const json = await res.json();
+    if (json.success) return json.data;
+    throw new Error(json.error || "Failed to fetch court stats.");
   }
 
   static async getHistory(): Promise<ICourtCaseSummary[]> {
-    try {
-      const res = await fetch(`${API_URL}/court/history`);
-      const json = await res.json();
-      if (json.success) return json.data;
-      throw new Error(json.error || "Failed to fetch court history.");
-    } catch (error) {
-      console.warn("[CourtService]: Using fallback history.", error);
-      return [
-        {
-          courtId: "case_022e0f900dff",
-          projectName: "NFT Marketplace Swarm",
-          integrityScore: 82,
-          consensusScore: 78,
-          approved: true,
-          timestamp: new Date().toISOString(),
-        },
-        {
-          courtId: "case_214cf5da76cd",
-          projectName: "DeFi Aggregator Swarm",
-          integrityScore: 65,
-          consensusScore: 60,
-          approved: false,
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-        }
-      ];
-    }
+    const res = await fetch(`${API_URL}/court/history`);
+    if (!res.ok) throw new Error(`Court history request failed: ${res.status}`);
+    const json = await res.json();
+    if (json.success) return json.data;
+    throw new Error(json.error || "Failed to fetch court history.");
   }
 
   static async getReport(courtId: string): Promise<any> {
-    try {
-      const res = await fetch(`${API_URL}/court/report/${courtId}`);
-      const json = await res.json();
-      if (json.success) return json.data;
-      throw new Error(json.error || "Failed to fetch report.");
-    } catch (error) {
-      console.warn("[CourtService]: Using mock report details.", error);
-      return null;
-    }
+    const res = await fetch(`${API_URL}/court/report/${courtId}`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.success) return json.data;
+    return null;
   }
 
   static async anchorReport(courtId: string, transactionHash: string, onChainCaseId?: string): Promise<any> {
-    try {
-      const res = await fetch(`${API_URL}/court/report/${courtId}/anchor`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactionHash, onChainCaseId }),
-      });
-      const json = await res.json();
-      if (json.success) return json.data;
-      throw new Error(json.error || "Failed to update transaction anchor.");
-    } catch (error) {
-      console.error("[CourtService]: Failed to anchor report in DB:", error);
-      throw error;
-    }
+    const res = await fetch(`${API_URL}/court/report/${courtId}/anchor`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transactionHash, onChainCaseId }),
+    });
+    if (!res.ok) throw new Error(`Anchor request failed: ${res.status}`);
+    const json = await res.json();
+    if (json.success) return json.data;
+    throw new Error(json.error || "Failed to update transaction anchor.");
   }
 }

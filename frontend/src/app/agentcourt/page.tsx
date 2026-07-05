@@ -151,21 +151,16 @@ export default function AgentCourt() {
         console.warn("Failed to load or merge on-chain verification cases:", onChainErr);
       }
 
+      // If both backend and on-chain are empty, show empty state
       if (list.length === 0) {
-        list = [
-          { courtId: "case_022e0f900dff", projectName: "NFT Marketplace Swarm", approved: true, integrityScore: 92, consensusScore: 88, timestamp: new Date().toISOString() },
-          { courtId: "case_18da9810a9fe", projectName: "DeFi Flash Loan Arbitrage Swarm", approved: false, integrityScore: 65, consensusScore: 60, timestamp: new Date().toISOString() },
-          { courtId: "case_f28bca12efda", projectName: "Monad Bridge Governance Swarm", approved: true, integrityScore: 96, consensusScore: 92, timestamp: new Date().toISOString() }
-        ];
-        
         s = {
-          totalCases: 3,
-          averageIntegrity: 84,
-          averageConsensus: 80,
-          averageConfidence: 77,
-          failedVerifications: 1,
-          approvedCount: 2,
-          approvalRate: 67,
+          totalCases: 0,
+          averageIntegrity: 0,
+          averageConsensus: 0,
+          averageConfidence: 0,
+          failedVerifications: 0,
+          approvedCount: 0,
+          approvalRate: 0,
           courtStatus: "Active",
           verifierStatus: "Online",
         };
@@ -239,9 +234,40 @@ export default function AgentCourt() {
         }
         setSelectedFileIdx(0);
       } else {
-        const fallbackDetails = generateMockDetails(id);
-        setSelectedCaseDetails(fallbackDetails);
-        setActiveEvidenceTab("violations");
+        const c = cases.find(item => item.courtId === id);
+        if (c) {
+          setSelectedCaseDetails({
+            courtId: c.courtId,
+            projectName: c.projectName,
+            approved: c.approved,
+            integrityScore: c.integrityScore || 90,
+            consensusScore: c.consensusScore || 85,
+            confidenceScore: c.confidenceScore || c.consensusScore || 85,
+            timestamp: c.timestamp,
+            transactionHash: "",
+            cid: "",
+            verifyingAgent: "agent_court",
+            arguments: [
+              `Auditing case artifacts for project: ${c.projectName}`,
+              c.approved 
+                ? "Consensus criteria met: Approved on-chain."
+                : "Consensus criteria failed: Rejected on-chain."
+            ],
+            violations: [],
+            recommendations: [],
+            validators: [
+              { validatorName: "Requirement Validator", score: c.consensusScore || 85, approved: c.approved, issues: [], recommendation: "" },
+              { validatorName: "Security Validator", score: c.integrityScore || 90, approved: c.approved, issues: [], recommendation: "" }
+            ],
+            evidence: {
+              researchCid: "",
+              developerCid: "",
+            }
+          });
+          setActiveEvidenceTab("developer");
+        } else {
+          setSelectedCaseDetails(null);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -267,62 +293,6 @@ export default function AgentCourt() {
       await fetchCaseDetails(selectedCaseId);
     }
     setRefreshing(false);
-  };
-
-  // UI mock fallback generator
-  const generateMockDetails = (id: string) => {
-    const isApproved = id === "case_022e0f900dff" || id === "case_f28bca12efda";
-    let name = "DeFi Aggregator Swarm";
-    if (id === "case_022e0f900dff") name = "NFT Marketplace Swarm";
-    if (id === "case_f28bca12efda") name = "Monad Bridge Governance Swarm";
-
-    return {
-      courtId: id,
-      projectName: name,
-      approved: isApproved,
-      integrityScore: isApproved ? (id === "case_f28bca12efda" ? 96 : 82) : 65,
-      consensusScore: isApproved ? (id === "case_f28bca12efda" ? 92 : 78) : 60,
-      confidenceScore: isApproved ? (id === "case_f28bca12efda" ? 94 : 85) : 55,
-      timestamp: new Date().toISOString(),
-      transactionHash: "0x1d5f2a138c201a4e107bb49f8cd628b03efac812ab50d9124be394faecde194b",
-      cid: "QmCMCourtReportMockCID1028392",
-      verifyingAgent: "agent_court",
-      arguments: isApproved 
-        ? [
-            "Audited solidity syntax rules and mapped requirement specifications.",
-            "Integrity verified. Security vulnerabilities mitigated in code revision loop.",
-            "Consensus met: Approved."
-          ]
-        : [
-            "Audited DeFi flash loan safety bounds.",
-            "Critical conflict detected: Research recommended Aave V3 pools, but Developer implemented Euler Vaults.",
-            "Security vulnerability: External transfer performed without nonReentrant guard.",
-            "Consensus rejected: Score below threshold."
-          ],
-      violations: isApproved 
-        ? [] 
-        : [
-            "Conflict: Research recommended Aave V3 pools, but Developer implemented Euler Vaults.",
-            "Security Hazard: Missing nonReentrant modifier on external flashLoan execution."
-          ],
-      recommendations: isApproved 
-        ? [] 
-        : [
-            "Refactor contracts/FlashSwapper.sol to use Aave V3 endpoints.",
-            "Add '@openzeppelin/contracts/security/ReentrancyGuard.sol' and mount 'nonReentrant' modifier."
-          ],
-      validators: [
-        { validatorName: "Requirement Validator", score: isApproved ? 90 : 70, approved: isApproved, issues: isApproved ? [] : ["Missing Aave endpoints"], recommendation: "Align endpoints" },
-        { validatorName: "Architecture Validator", score: isApproved ? 95 : 60, approved: isApproved, issues: isApproved ? [] : ["Integration mismatch"], recommendation: "Fix pools" },
-        { validatorName: "Security Validator", score: isApproved ? 100 : 50, approved: isApproved, issues: isApproved ? [] : ["Missing reentrancy guard"], recommendation: "Add guards" },
-        { validatorName: "Consistency Validator", score: isApproved ? 100 : 60, approved: isApproved, issues: isApproved ? [] : ["Database/library mismatch"], recommendation: "Swap libraries" },
-        { validatorName: "Monad Usage Validator", score: isApproved ? 90 : 80, approved: true, issues: [], recommendation: "Optimized" }
-      ],
-      evidence: {
-        researchCid: "QmResearchFallbackMockHash10283",
-        developerCid: "QmDeveloperFallbackMockHash48293",
-      }
-    };
   };
 
   const selectedCase = cases.find(c => c.courtId === selectedCaseId) || selectedCaseDetails;

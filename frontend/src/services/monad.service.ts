@@ -177,7 +177,7 @@ export class MonadService implements IMonadService {
       const tx = await contract.createTask(descriptionURI, parentTask, dependencies, priority, deadline, estimatedTime);
       const receipt = await tx.wait();
       
-      let taskId = "task_mock_" + Date.now();
+      let taskId = "task_" + Date.now();
       for (const log of receipt.logs) {
         try {
           const parsedLog = contract.interface.parseLog(log);
@@ -186,7 +186,7 @@ export class MonadService implements IMonadService {
             break;
           }
         } catch (e) {
-          // ignore
+          // ignore non-matching logs
         }
       }
       
@@ -200,11 +200,8 @@ export class MonadService implements IMonadService {
         }
       };
     } catch (error) {
-      console.warn("Failed to execute on-chain createTask transaction, using fallback:", error);
-      return {
-        taskId: "task_mock_" + Date.now(),
-        receipt: { transactionHash: "0x" + "a".repeat(64), blockNumber: 100, gasUsed: "21000", status: 1 },
-      };
+      console.error("Failed to execute on-chain createTask transaction:", error);
+      throw error;
     }
   };
 
@@ -225,7 +222,7 @@ export class MonadService implements IMonadService {
       const tx = await contract.registerMemory(projectId, formattedTaskId, ipfsHash, integrity, consensus, isVerified, isPrivate);
       const receipt = await tx.wait();
       
-      let memoryId = "mem_mock_" + Date.now();
+      let memoryId = "mem_" + Date.now();
       for (const log of receipt.logs) {
         try {
           const parsedLog = contract.interface.parseLog(log);
@@ -234,7 +231,7 @@ export class MonadService implements IMonadService {
             break;
           }
         } catch (e) {
-          // ignore
+          // ignore non-matching logs
         }
       }
       
@@ -248,11 +245,8 @@ export class MonadService implements IMonadService {
         }
       };
     } catch (error) {
-      console.warn("Failed to execute on-chain registerMemory transaction, using fallback:", error);
-      return {
-        memoryId: "mem_mock_" + Date.now(),
-        receipt: { transactionHash: "0x" + "b".repeat(64), blockNumber: 101, gasUsed: "45000", status: 1 },
-      };
+      console.error("Failed to execute on-chain registerMemory transaction:", error);
+      throw error;
     }
   };
 
@@ -264,7 +258,7 @@ export class MonadService implements IMonadService {
       const tx = await contract.initiateVerification(formattedTaskId, evidenceHash);
       const receipt = await tx.wait();
       
-      let caseId = "case_mock_" + Date.now();
+      let caseId = "case_" + Date.now();
       for (const log of receipt.logs) {
         try {
           const parsedLog = contract.interface.parseLog(log);
@@ -333,8 +327,8 @@ export class MonadService implements IMonadService {
         status: receipt.status === 1 ? 1 : 0,
       };
     } catch (error) {
-      console.warn("Failed to execute on-chain submitVote transaction, using fallback:", error);
-      return { transactionHash: "0x" + "c".repeat(64), blockNumber: 102, gasUsed: "32000", status: 1 };
+      console.error("Failed to execute on-chain submitVote transaction:", error);
+      throw error;
     }
   };
 

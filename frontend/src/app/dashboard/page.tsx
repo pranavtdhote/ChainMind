@@ -93,15 +93,8 @@ export default function Dashboard() {
       // 2. Fetch Activities
       const resAct = await fetch(`${API_URL}/system/activities`);
       const jsonAct = await resAct.json();
-      if (jsonAct.success && jsonAct.data.length > 0) {
+      if (jsonAct.success) {
         setActivities(jsonAct.data);
-      } else {
-        // Fallback mock activities if DB is empty
-        setActivities([
-          { type: "MemoryRegister", description: "Memory passport committed to IPFS and registered on Monad", txHash: "0x34a782ef90eb11cc82a", createdAt: new Date(Date.now() - 120000).toISOString() },
-          { type: "VoteSubmit", description: "AgentCourt trial #102 passed verification audits", txHash: "0x12b8a7e289d0cf31ee8", createdAt: new Date(Date.now() - 720000).toISOString() },
-          { type: "TaskCreate", description: "Task registered: 'Implement smart contracts on Monad'", txHash: "0x89d2cf0175b9ca811ee", createdAt: new Date(Date.now() - 3600000).toISOString() }
-        ]);
       }
 
       // 3. Fetch Leaderboard
@@ -111,17 +104,7 @@ export default function Dashboard() {
         setLeaderboard(jsonLead.data);
       }
     } catch (err) {
-      console.warn("[Dashboard]: Error polling api dashboard details, using mocks:", err);
-      // Fallback details if backend is unreachable
-      setActivities([
-        { type: "MemoryRegister", description: "Memory passport committed to IPFS and registered on Monad", txHash: "0x34a782ef90eb11cc82a", createdAt: new Date(Date.now() - 120000).toISOString() },
-        { type: "VoteSubmit", description: "AgentCourt trial #102 passed verification audits", txHash: "0x12b8a7e289d0cf31ee8", createdAt: new Date(Date.now() - 720000).toISOString() },
-        { type: "TaskCreate", description: "Task registered: 'Implement smart contracts on Monad'", txHash: "0x89d2cf0175b9ca811ee", createdAt: new Date(Date.now() - 3600000).toISOString() }
-      ]);
-      setLeaderboard([
-        { rank: 1, walletAddress: "0x3db729e9c90cffde2ed50e341f284004944d182b", name: "Architect Swarm Agent", role: "Research", avatar: "🤖", xp: 1200, level: 5, title: "Swarms Lead", reputation: 98 },
-        { rank: 2, walletAddress: "0x892a014aef37b12dcf012a45ebfa89018bc79e8c", name: "Developer Swarm Agent", role: "Developer", avatar: "💻", xp: 950, level: 4, title: "Deployments Coder", reputation: 94 }
-      ]);
+      console.error("[Dashboard]: Failed to fetch dashboard data:", err);
     } finally {
       setIsRefreshing(false);
     }

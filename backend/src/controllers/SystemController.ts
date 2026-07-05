@@ -1,22 +1,31 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import { NotificationService } from "../services/NotificationService";
 import { ActivityModel } from "../models/Activity";
 
 export class SystemController {
   getHealth = async (req: Request, res: Response): Promise<void> => {
+    const dbState = mongoose.connection.readyState;
+    // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+    const dbStatus = dbState === 1 ? "connected" : dbState === 2 ? "connecting" : "disconnected";
+
+    let blockchainStatus = "connected";
     try {
-      res.status(200).json({
-        success: true,
-        data: {
-          monadNode: { status: "Healthy", latency: 24 },
-          groqAPI: { status: "Healthy", latency: 185 },
-          ipfsGateway: { status: "Healthy", latency: 94 },
-          database: { status: "Healthy", latency: 4 },
-        },
-      });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
+      const { ethers } = await import("ethers");
+      const provider = new ethers.JsonRpcProvider(process.env.MONAD_TESTNET_RPC_URL || "https://testnet-rpc.monad.xyz");
+      await provider.getBlockNumber();
+    } catch {
+      blockchainStatus = "disconnected";
     }
+
+    res.status(200).json({
+      status: "online",
+      database: dbStatus,
+      blockchain: blockchainStatus,
+      redis: "disabled",
+      version: "1.0.0",
+      timestamp: new Date().toISOString(),
+    });
   };
 
   getNotifications = async (req: Request, res: Response): Promise<void> => {
