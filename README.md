@@ -1,10 +1,6 @@
 # ChainMind Protocol
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ChainMindProtocol/assets/main/banner.png" alt="ChainMind Protocol Banner" width="100%" max-width="800px" style="border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);" />
-</p>
-
-<p align="center">
   <strong>The Trust & Memory Layer for the Agent Economy</strong>
 </p>
 
