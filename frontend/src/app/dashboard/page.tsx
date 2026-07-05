@@ -21,9 +21,9 @@ import {
 } from "lucide-react";
 import { formatAddress } from "../../constants/wallet";
 
-import { API_BASE_URL } from "@/config/api";
+import { API_URL as BASE_API_URL } from "@/lib/api";
 
-const API_URL = `${API_BASE_URL}/api`;
+const API_URL = `${BASE_API_URL}/api`;
 
 interface IAnalytics {
   totalProjects: number;

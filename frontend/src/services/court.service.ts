@@ -1,6 +1,6 @@
-import { API_BASE_URL } from "@/config/api";
+import { API_URL as BASE_API_URL } from "@/lib/api";
 
-const API_URL = `${API_BASE_URL}/api`;
+const API_URL = `${BASE_API_URL}/api`;
 
 export interface ICourtStatistics {
   totalCases: number;

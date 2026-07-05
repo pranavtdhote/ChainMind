@@ -18,15 +18,23 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (server-to-server, curl, health checks)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.some((allowed) => origin.startsWith(allowed))) {
-      return callback(null, true);
+    const isAllowed = allowedOrigins.some((allowed) => {
+      return origin === allowed || origin.startsWith(allowed);
+    });
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(null, false); // Fail silently or reject
     }
-    callback(null, false);
   },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
+
+// Pre-flight options request handling
+app.options("*", cors() as any);
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));

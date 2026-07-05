@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
-import { API_BASE_URL } from "@/config/api";
+import { API_URL } from "@/lib/api";
 import { AlertTriangle, RefreshCw, CheckCircle } from "lucide-react";
 
 interface AppLayoutProps {
@@ -12,10 +12,12 @@ interface AppLayoutProps {
 }
 
 interface HealthStatus {
+  success: boolean;
   status: string;
+  service: string;
   database: string;
-  blockchain: string;
   version: string;
+  timestamp: string;
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
@@ -23,12 +25,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const [healthData, setHealthData] = useState<HealthStatus | null>(null);
 
   const checkHealth = async () => {
-    setBackendStatus("checking");
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const res = await fetch(`${API_BASE_URL}/api/system/health`, {
+      const res = await fetch(`${API_URL}/api/health`, {
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -36,7 +37,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
       if (res.ok) {
         const data = await res.json();
         setHealthData(data);
-        setBackendStatus("online");
+        if (data.status === "online") {
+          setBackendStatus("online");
+        } else {
+          setBackendStatus("offline");
+        }
       } else {
         setBackendStatus("offline");
       }
