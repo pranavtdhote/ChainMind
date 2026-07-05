@@ -5,5 +5,7 @@ if (isProd && !api_url) {
   console.error("CRITICAL ERROR: NEXT_PUBLIC_API_URL environment variable is missing in production! Falling back to valiant-freedom-production-926f.up.railway.app");
 }
 
-export const API_URL = api_url || "https://valiant-freedom-production-926f.up.railway.app";
+// Sanitize the URL by removing any trailing slashes to prevent "//api/..." route issues
+const rawUrl = api_url || "https://valiant-freedom-production-926f.up.railway.app";
+export const API_URL = rawUrl.replace(/\/$/, "");
 export const API_BASE_URL = API_URL;
