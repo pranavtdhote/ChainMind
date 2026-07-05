@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AppLayout from "../../components/layout/AppLayout";
 import { useNotifications } from "../../context/NotificationContext";
+import { API_BASE_URL } from "@/config/api";
 import {
   Search,
   Grid,
@@ -91,7 +92,7 @@ export default function MemoryExplorer() {
   const fetchPassports = async () => {
     setIsLoading(true);
     try {
-      let url = `http://localhost:5000/api/memory?limit=50`;
+      let url = `${API_BASE_URL}/api/memory?limit=50`;
       if (searchQuery) {
         url += `&q=${encodeURIComponent(searchQuery)}`;
       }
@@ -134,7 +135,7 @@ export default function MemoryExplorer() {
     const fetchHistory = async () => {
       setIsLoadingHistory(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/memory/history/${selectedPassport.memoryId}`);
+        const response = await fetch(`${API_BASE_URL}/api/memory/history/${selectedPassport.memoryId}`);
         if (!response.ok) throw new Error("Failed to fetch commit history.");
         const result = await response.json();
         if (result.success) {
@@ -163,7 +164,7 @@ export default function MemoryExplorer() {
     try {
       addNotification("Downloading project context from IPFS...", "info");
       
-      const response = await fetch(`http://localhost:5000/api/memory/download/${cid}`);
+      const response = await fetch(`${API_BASE_URL}/api/memory/download/${cid}`);
       if (!response.ok) throw new Error("IPFS download failed.");
       
       const result = await response.json();

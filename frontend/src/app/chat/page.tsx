@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useWallet } from "../../context/WalletContext";
 import { useNotifications } from "../../context/NotificationContext";
+import { API_BASE_URL } from "@/config/api";
 
 interface SwarmTask {
   id: string;
@@ -140,7 +141,7 @@ export default function ChatSwarm() {
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/chat/history");
+        const res = await fetch(`${API_BASE_URL}/api/chat/history`);
         const json = await res.json();
         if (json.success) {
           setConversationHistory(json.data);
@@ -155,7 +156,7 @@ export default function ChatSwarm() {
   // Load a specific past conversation
   const loadConversation = async (convId: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/chat/${convId}`);
+      const res = await fetch(`${API_BASE_URL}/api/chat/${convId}`);
       const json = await res.json();
       if (json.success && json.data) {
         const conv = json.data;
@@ -185,7 +186,7 @@ export default function ChatSwarm() {
     setInputText("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/chat", {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

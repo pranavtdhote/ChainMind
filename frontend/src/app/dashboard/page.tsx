@@ -21,7 +21,9 @@ import {
 } from "lucide-react";
 import { formatAddress } from "../../constants/wallet";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+import { API_BASE_URL } from "@/config/api";
+
+const API_URL = `${API_BASE_URL}/api`;
 
 interface IAnalytics {
   totalProjects: number;
