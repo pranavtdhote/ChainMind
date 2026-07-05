@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
+    "target": "ES2022",
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "esnext",
+
+    "rootDir": "./src",
+    "outDir": "./dist",
 
     "types": ["node"],
 
@@ -11,19 +14,19 @@
     "resolveJsonModule": true,
 
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
+    "declarationMap": false,
+
+    "strict": true,
+    "skipLibCheck": true,
 
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
 
-    "strict": true,
-    "jsx": "react-jsx",
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-
-    "skipLibCheck": true
-  }
+    "moduleDetection": "force"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
